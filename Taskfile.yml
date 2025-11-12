@@ -1,0 +1,20 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+    VPNX_OUTPUT: bin/vpnx
+    VPNXD_OUTPUT: bin/vpnxd
+
+tasks:
+    build-vpnx:
+        cmds:
+            - go build -o "{{.VPNX_OUTPUT}}" ./cmd/vpnx
+
+    build-vpnxd:
+        cmds:
+            - go build -o "{{.VPNXD_OUTPUT}}" ./cmd/vpnxd
+
+    build-all:
+        cmds:
+            - task build-vpnx build-vpnxd
