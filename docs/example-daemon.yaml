@@ -1,0 +1,39 @@
+version: 1
+
+daemon:
+    api_socket: /run/vpnx.sock
+    state_dir: /var/lib/vpnx
+    health_address: "127.0.0.1:9000"
+
+mesh:
+    provider: tailscale
+    tailscale:
+        hostname: "vpnx-exit-1"
+        auth_key: ""
+        control_url: ""
+        magic_dns: true
+
+provider:
+    type: wireguard
+    wireguard:
+        config_path: "/etc/vpnx/provider.conf"
+
+exit:
+    advertise_subnets:
+        - "0.0.0.0/0"
+        - "::/0"
+    exclude_subnets:
+        - "192.168.0.0/16"
+        - "10.0.0.0/8"
+    dns:
+        mode: override
+        upstreams:
+            - "1.1.1.1"
+            - "1.0.0.1"
+    killswitch:
+        enabled: true
+        allow_lan: true
+
+logging:
+    level: info
+    format: text
