@@ -117,8 +117,8 @@ type LoggingSection struct {
 	Format string `yaml:"format"`
 }
 
-func DefaultDaemonConfig() DaemonConfig {
-	return DaemonConfig{
+func DefaultDaemonConfig() *DaemonConfig {
+	return &DaemonConfig{
 		Version: 1,
 		Daemon: DaemonSection{
 			APISocket:     "/run/vpnx/api.sock",

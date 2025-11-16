@@ -30,8 +30,8 @@ type CLIContainerConfig struct {
 }
 
 // DefaultCLIConfig returns a CLIConfig populated with reasonable defaults.
-func DefaultCLIConfig() CLIConfig {
-	return CLIConfig{
+func DefaultCLIConfig() *CLIConfig {
+	return &CLIConfig{
 		SocketPath:     "/var/run/vpnx.sock",
 		RequestTimeout: 5 * time.Second,
 		LogLevel:       "info",
