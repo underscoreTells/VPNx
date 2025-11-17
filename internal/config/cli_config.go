@@ -14,7 +14,7 @@ type CLIConfig struct {
 	LogLevel string `yaml:"log_level,omitempty"`
 
 	// Container holds optional container-integration settings for the CLI.
-	Container *CLIContainerConfig `yaml:"container,omitempty"`
+	Container CLIContainerConfig `yaml:"container,omitempty"`
 }
 
 // CLIContainerConfig holds optional container-integration settings for the CLI.
