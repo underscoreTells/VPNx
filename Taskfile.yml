@@ -3,22 +3,17 @@
 version: "3"
 
 vars:
-    VPNX_OUTPUT: bin/vpnx
-    VPNXD_OUTPUT: bin/vpnxd
+  VPNX_OUTPUT: bin/vpnx
 
 tasks:
-    build-vpnx:
-        cmds:
-            - go build -o "{{.VPNX_OUTPUT}}" ./cmd/vpnx
+  build-vpnx:
+    cmds:
+      - go build -o "{{.VPNX_OUTPUT}}" ./cmd/vpnx
 
-    build-vpnxd:
-        cmds:
-            - go build -o "{{.VPNXD_OUTPUT}}" ./cmd/vpnxd
+  build-all:
+    cmds:
+      - task build-vpnx build-vpnxd
 
-    build-all:
-        cmds:
-            - task build-vpnx build-vpnxd
-
-    test:
-        cmds:
-            - go test ./...
+  test:
+    cmds:
+      - go test ./...
