@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 
 // LoadConfigFromFile loads a config file from disk, validates it against the provided
 // schema, and returns the parsed config along with any validation errors encountered.
-func LoadConfigFromFile(path string, schema *z.StructSchema) (*CoreConfig, []error) {
+func LoadConfigFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) {
 	ext := filepath.Ext(path)
 	if ext != ".json" {
 		return nil, []error{fmt.Errorf("unsupported config file extension: %s", ext)}
@@ -24,8 +25,18 @@ func LoadConfigFromFile(path string, schema *z.StructSchema) (*CoreConfig, []err
 		return nil, []error{fmt.Errorf("failed to read config file %s: %w", path, err)}
 	}
 
-	var cfg CoreConfig
-	zogErrs := schema.Parse(zjson.Decode(bytes.NewReader(data)), &cfg)
+	configVersion, err := GetConfigVersion(data)
+	if err != nil {
+		return nil, []error{fmt.Errorf("failed to get config version: %w", err)}
+	}
+
+	rawConfig := ConfigVersions[configVersion]()
+	config, ok := rawConfig.(cfg)
+	if !ok {
+		return nil, []error{fmt.Errorf("failed to convert config to type %T", config)}
+	}
+
+	zogErrs := schema.Parse(zjson.Decode(bytes.NewReader(data)), &config)
 
 	if len(zogErrs) > 0 {
 		errors := make([]error, len(zogErrs))
@@ -35,11 +46,14 @@ func LoadConfigFromFile(path string, schema *z.StructSchema) (*CoreConfig, []err
 		return nil, errors
 	}
 
-	return &cfg, nil
+	return &config, nil
 }
 
-// LoadCoreConfigFromFile loads a core config file from disk, validates it against the
-// CoreConfigSchema, and returns the parsed config along with any validation errors encountered.
-func LoadCoreConfigFromFile(path string) (*CoreConfig, []error) {
-	return LoadConfigFromFile(path, CoreConfigSchema)
+func GetConfigVersion(data []byte) (ConfigVersion, error) {
+	var version ConfigVersion
+	err := json.Unmarshal(data, &version)
+	if err != nil {
+		return 0, fmt.Errorf("failed to unmarshal config version: %w", err)
+	}
+	return version, nil
 }

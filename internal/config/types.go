@@ -1,9 +1,5 @@
 package config
 
-import (
-	z "github.com/Oudwins/zog"
-)
-
 // === Enums ===
 
 const (
@@ -13,28 +9,22 @@ const (
 	LOG_LEVEL_ERROR   = "error"
 )
 
-// === Types ===
+type VPNType string
 
-type LogConfig struct {
-	Level       string
-	Destination string
-	FileName    string
-}
+const (
+	VPN_TYPE_WIREGUARD VPNType = "wireguard"
+	VPN_TYPE_OPENVPN   VPNType = "openvpn"
+)
 
-type CoreConfig struct {
-	Log            LogConfig
-	GluetunVersion string
-}
+type VPNCredentialSource string
 
-// ===  Schemas ===
+const (
+	CREDENTIAL_SOURCE_FILE VPNCredentialSource = "file"
+	CREDENTIAL_SOURCE_ENV  VPNCredentialSource = "env"
+)
 
-var LogConfigSchema = z.Struct(z.Shape{
-	"level":       z.String().Default(DEFAULT_LOG_LEVEL).OneOf([]string{LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR}),
-	"destination": z.String(),
-	"filename":    z.String(),
-})
+type ConfigVersion int
 
-var CoreConfigSchema = z.Struct(z.Shape{
-	"log":             LogConfigSchema,
-	"gluetun_version": z.String().Default(GLUETUN_TARGET_VERSION),
-})
+const (
+	CONFIG_VERSION_ONE ConfigVersion = 1
+)

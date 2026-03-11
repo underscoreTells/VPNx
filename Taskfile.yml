@@ -6,13 +6,9 @@ vars:
   VPNX_OUTPUT: bin/vpnx
 
 tasks:
-  build-vpnx:
+  build:
     cmds:
       - go build -o "{{.VPNX_OUTPUT}}" ./cmd/vpnx
-
-  build-all:
-    cmds:
-      - task build-vpnx build-vpnxd
 
   test:
     cmds:
