@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,21 +12,28 @@ import (
 
 // LoadConfigFromFile loads a config file from disk, validates it against the provided
 // schema, and returns the parsed config along with any validation errors encountered.
-func LoadConfigFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) {
+func LoadFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) {
 	ext := filepath.Ext(path)
 	if ext != ".json" {
 		return nil, []error{fmt.Errorf("unsupported config file extension: %s", ext)}
 	}
 
 	data, err := os.ReadFile(path)
-
 	if err != nil {
 		return nil, []error{fmt.Errorf("failed to read config file %s: %w", path, err)}
 	}
 
-	configVersion, err := GetConfigVersion(data)
-	if err != nil {
-		return nil, []error{fmt.Errorf("failed to get config version: %w", err)}
+	return LoadFromBytes[cfg](data, schema)
+}
+
+func LoadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error) {
+	configVersion, versionErrs := GetConfigVersion(data, VPNSchemaVersion)
+	if len(versionErrs) > 0 {
+		errors := make([]error, len(versionErrs))
+		for i, versionErr := range versionErrs {
+			errors[i] = fmt.Errorf("config validation failed: %s: %w", versionErr.Message, versionErr.Err)
+		}
+		return nil, errors
 	}
 
 	rawConfig := ConfigVersions[configVersion]()
@@ -49,11 +55,15 @@ func LoadConfigFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []e
 	return &config, nil
 }
 
-func GetConfigVersion(data []byte) (ConfigVersion, error) {
-	var version ConfigVersion
-	err := json.Unmarshal(data, &version)
-	if err != nil {
-		return 0, fmt.Errorf("failed to unmarshal config version: %w", err)
+func GetConfigVersion(data []byte, versionSchema *z.StructSchema) (ConfigVersion, z.ZogIssueList) {
+	var schemaVersion SchemaVersion
+	zogErrs := versionSchema.Parse(zjson.Decode(bytes.NewReader(data)), &schemaVersion)
+
+	if len(zogErrs) > 0 {
+		return 0, zogErrs
 	}
-	return version, nil
+
+	configVersion := schemaVersion.SchemaVersion
+
+	return configVersion, nil
 }
