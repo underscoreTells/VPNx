@@ -9,7 +9,7 @@ var (
 	testSchemaVersion  = DEFAULT_CONFIG_VERSION
 	testGluetunVersion = GLUETUN_TARGET_VERSION
 	testVPNProvider    = "custom"
-	testVPNType        = VPN_TYPE_WIREGUARD
+	testVPNProtocol    = VPN_PROTOCOL_WIREGUARD
 	testUsernameFrom   = "env"
 	testUsernameName   = "VPN_USERNAME"
 	testPasswordFrom   = "env"
@@ -22,7 +22,7 @@ var (
 	"gluetun_version": "%s",
 	"vpn_config": {
 		"provider": "%s",
-		"type": "%s",
+		"protocol": "%s",
 		"credentials": {
 			"username": {
 				"from": "%s",
@@ -43,7 +43,7 @@ var (
 		testSchemaVersion,
 		testGluetunVersion,
 		testVPNProvider,
-		testVPNType,
+		testVPNProtocol,
 		testUsernameFrom,
 		testUsernameName,
 		testPasswordFrom,
@@ -104,8 +104,8 @@ func TestLoadFromBytes(t *testing.T) {
 		t.Errorf("LoadFromBytes returned wrong VPN provider: %s, expected %s", config.VPNConfig.Provider, testVPNProvider)
 	}
 
-	if config.VPNConfig.Type != testVPNType {
-		t.Errorf("LoadFromBytes returned wrong VPN type: %s, expected %s", config.VPNConfig.Type, testVPNType)
+	if config.VPNConfig.Protocol != testVPNProtocol {
+		t.Errorf("LoadFromBytes returned wrong VPN protocol: %s, expected %s", config.VPNConfig.Protocol, testVPNProtocol)
 	}
 
 	if config.VPNConfig.Credentials.Username.From != testUsernameFrom {
@@ -147,8 +147,8 @@ func TestDefaults(t *testing.T) {
 		t.Errorf("LoadFromBytes returned wrong schema version: %d, expected %d", config.SchemaVersion, DEFAULT_CONFIG_VERSION)
 	}
 
-	if config.VPNConfig.Type != DEFAULT_VPN_TYPE {
-		t.Errorf("LoadFromBytes returned wrong VPN type: %s, expected %s", config.VPNConfig.Type, DEFAULT_VPN_TYPE)
+	if config.VPNConfig.Protocol != DEFAULT_VPN_PROTOCOL {
+		t.Errorf("LoadFromBytes returned wrong VPN protocol: %s, expected %s", config.VPNConfig.Protocol, DEFAULT_VPN_PROTOCOL)
 	}
 
 	if config.Log.Level != DEFAULT_LOG_LEVEL {

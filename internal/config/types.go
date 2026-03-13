@@ -9,11 +9,11 @@ const (
 	LOG_LEVEL_ERROR   = "error"
 )
 
-type VPNType string
+type VPNProtocol string
 
 const (
-	VPN_TYPE_WIREGUARD VPNType = "wireguard"
-	VPN_TYPE_OPENVPN   VPNType = "openvpn"
+	VPN_PROTOCOL_WIREGUARD VPNProtocol = "wireguard"
+	VPN_PROTOCOL_OPENVPN   VPNProtocol = "openvpn"
 )
 
 type VPNCredentialSource string

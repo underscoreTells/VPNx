@@ -14,8 +14,8 @@ type ConfigVersionOne struct {
 	SchemaVersion  ConfigVersion `zog:"schema_version"`
 	GluetunVersion string        `zog:"gluetun_version"`
 	VPNConfig      struct {
-		Provider    string  `zog:"provider"`
-		Type        VPNType `zog:"type"`
+		Provider    string      `zog:"provider"`
+		Protocol    VPNProtocol `zog:"protocol"`
 		Credentials struct {
 			Username struct {
 				From string `zog:"from"`
@@ -39,7 +39,7 @@ var VPNConfigVersionOneSchema = z.Struct(z.Shape{
 	"GluetunVersion": z.String(),
 	"VPNConfig": z.Struct(z.Shape{
 		"Provider": z.String(),
-		"Type":     z.StringLike[VPNType]().Default(DEFAULT_VPN_TYPE).OneOf([]VPNType{VPN_TYPE_WIREGUARD, VPN_TYPE_OPENVPN}),
+		"Protocol": z.StringLike[VPNProtocol]().Default(DEFAULT_VPN_PROTOCOL).OneOf([]VPNProtocol{VPN_PROTOCOL_WIREGUARD, VPN_PROTOCOL_OPENVPN}),
 		"Credentials": z.Struct(z.Shape{
 			"Username": z.Struct(z.Shape{
 				"From": z.String(),
