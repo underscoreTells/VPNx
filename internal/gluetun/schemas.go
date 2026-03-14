@@ -2,7 +2,7 @@ package gluetun
 
 import (
 	z "github.com/Oudwins/zog"
-	"github.com/underscoreTells/vpn-exit-node/config"
+	"github.com/underscoreTells/vpn-exit-node/internal/config"
 )
 
 var vpnProviderValues = []VPNProvider{
