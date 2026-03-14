@@ -29,13 +29,13 @@ func floatEnumSchema[T ~float64](values []T) *z.NumberSchema[T] {
 }
 
 func isValidListeningAddress[T ~string](data *T, ctx z.Ctx) bool {
-	if (*data)[0] != ':' {
+	if len(*data) == 0 || (*data)[0] != ':' {
 		ctx.AddIssue(ctx.Issue().SetMessage("Listening Addess needs to start with ':'"))
 		return false
 	}
 
-	_, err := strconv.Atoi(string((*data)[1:]))
-	if err != nil {
+	port, err := strconv.Atoi(string((*data)[1:]))
+	if err != nil || port < 0 || port > 65535 {
 		ctx.AddIssue(ctx.Issue().SetMessage("Listening Address needs to be a valid port number"))
 		return false
 	}
@@ -89,7 +89,12 @@ const (
 
 func isValidTimePeriod[T ~string](data *T, ctx z.Ctx) bool {
 	s := string(*data)
-	period, err := strconv.Atoi(s[0 : len(s)-2])
+	if len(s) < 2 {
+		ctx.AddIssue(ctx.Issue().SetMessage("Time period must contain a valid integer before the time period suffix. Valid suffixes are s, m, h"))
+		return false
+	}
+
+	period, err := strconv.Atoi(s[:len(s)-1])
 	if err != nil {
 		ctx.AddIssue(ctx.Issue().SetMessage("Time period must contain a valid integer before the time period suffix. Valid suffixes are s, m, h"))
 		return false
@@ -108,6 +113,9 @@ func isValidTimePeriod[T ~string](data *T, ctx z.Ctx) bool {
 			ctx.AddIssue(ctx.Issue().SetMessage("Time period must be between 0 and 24 hours"))
 			return false
 		}
+	default:
+		ctx.AddIssue(ctx.Issue().SetMessage("Time period must contain a valid integer before the time period suffix. Valid suffixes are s, m, h"))
+		return false
 	}
 
 	return true
@@ -219,6 +227,28 @@ func isValidSubnet[T ~string](data *T, ctx z.Ctx) bool {
 	}
 	if prefix < 0 || prefix > 32 {
 		ctx.AddIssue(ctx.Issue().SetMessage("subnet prefix must be between 0 and 32"))
+		return false
+	}
+
+	return true
+}
+
+func isValidCIDRAddress[T ~string](data *T, ctx z.Ctx) bool {
+	s := strings.TrimSpace(string(*data))
+	if len(s) == 0 {
+		ctx.AddIssue(ctx.Issue().SetMessage("address cannot be empty"))
+		return false
+	}
+
+	prefix, err := netip.ParsePrefix(s)
+	if err != nil {
+		ctx.AddIssue(ctx.Issue().SetMessage(fmt.Sprintf("invalid CIDR address: %s", s)))
+		return false
+	}
+
+	addr := prefix.Addr()
+	if !addr.Is4() {
+		ctx.AddIssue(ctx.Issue().SetMessage("address must be an IPv4 CIDR"))
 		return false
 	}
 
