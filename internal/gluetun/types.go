@@ -1,6 +1,6 @@
 package gluetun
 
-import "github.com/underscoreTells/vpn-exit-node/internal/config"
+import "github.com/underscoreTells/vpn-exit-node/config"
 
 type VPNProvider string
 
@@ -385,5 +385,5 @@ type WireguardOptions struct {
 	AllowedIPs                  []string                `mapstructure:"WIREGUARD_ALLOWED_IPS,omitempty"`
 	Implementation              WireguardImplementation `mapstructure:"WIREGUARD_IMPLEMENTATION,omitempty"`
 	MTU                         int                     `mapstructure:"WIREGUARD_MTU,omitempty"`
-	PersistentKeepaliveInterval int                     `mapstructure:"WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL,omitempty"`
+	PersistentKeepaliveInterval string                  `mapstructure:"WIREGUARD_PERSISTENT_KEEPALIVE_INTERVAL,omitempty"`
 }

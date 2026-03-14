@@ -1,6 +1,6 @@
 package gluetun
 
-import "github.com/underscoreTells/vpn-exit-node/internal/config"
+import "github.com/underscoreTells/vpn-exit-node/config"
 
 type GluetunProfile struct {
 	Provider VPNProvider
