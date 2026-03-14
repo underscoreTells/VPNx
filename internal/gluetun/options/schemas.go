@@ -1,4 +1,4 @@
-package gluetun
+package options
 
 import (
 	z "github.com/Oudwins/zog"
@@ -66,7 +66,7 @@ var HttpControlServerLogSchema = stringEnumSchema([]HttpControlServerLog{
 	HttpControlServerLogOff,
 })
 
-var ControlServerOptionsSchema = z.Struct(z.Shape{
+var ControlServerSchema = z.Struct(z.Shape{
 	"Address":            z.String().TestFunc(isValidListeningAddress),
 	"Log":                HttpControlServerLogSchema,
 	"AuthConfigFilepath": z.String().TestFunc(isValidFilePath),
@@ -249,7 +249,7 @@ var OtherSchema = z.Struct(z.Shape{
 	"BoringPollGluetunCom": BoringPollGluetunComSchema,
 })
 
-var VPNPortForwardingSchema = stringEnumSchema([]VPNPortForwarding{
+var VPNPortForwardingStatusSchema = stringEnumSchema([]VPNPortForwardingStatus{
 	VPNPortForwardingOn,
 	VPNPortForwardingOff,
 })
@@ -262,8 +262,8 @@ var VPNPortForwardingProviderSchema = stringEnumSchema([]VPNPortForwardingProvid
 	PortForwardingProtonVPN,
 })
 
-var VPNServerPortForwardingOptionsSchema = z.Struct(z.Shape{
-	"VPNPortForwarding": VPNPortForwardingSchema,
+var VPNPortForwardingSchema = z.Struct(z.Shape{
+	"VPNPortForwarding": VPNPortForwardingStatusSchema,
 	"Provider":          VPNPortForwardingProviderSchema,
 	"StatusFile":        z.String().TestFunc(isValidFilePath),
 	"ListeningPort":     z.Int().GTE(0).LTE(65535),
@@ -271,7 +271,7 @@ var VPNServerPortForwardingOptionsSchema = z.Struct(z.Shape{
 	"DownCommand":       z.String(),
 })
 
-var ShadowSocksSchema = stringEnumSchema([]ShadowSocks{
+var ShadowSocksStatusSchema = stringEnumSchema([]ShadowSocksStatus{
 	ShadowSocksOn,
 	ShadowSocksOff,
 })
@@ -287,19 +287,19 @@ var ShadowSocksCipherSchema = stringEnumSchema([]ShadowSocksCipher{
 	ShadowSocksCipherAes256Gcm,
 })
 
-var ShadowSocksOptionsSchema = z.Struct(z.Shape{
-	"ShadowSocks":      ShadowSocksSchema,
+var ShadowSocksSchema = z.Struct(z.Shape{
+	"ShadowSocks":      ShadowSocksStatusSchema,
 	"Log":              ShadowSocksLogSchema,
 	"ListeningAddress": z.String().TestFunc(isValidListeningAddress),
 	"Password":         z.String(),
 	"Cipher":           ShadowSocksCipherSchema,
 })
 
-var StorageOptionsSchema = z.Struct(z.Shape{
+var StorageSchema = z.Struct(z.Shape{
 	"FilePath": z.String().TestFunc(isValidFilePath),
 })
 
-var ServerUpdaterOptionsSchema = z.Struct(z.Shape{
+var ServerUpdaterSchema = z.Struct(z.Shape{
 	"Period":              z.String().TestFunc(isValidTimePeriod),
 	"MinRatio":            z.Float64().GT(0).LTE(1),
 	"VPNServiceProviders": z.Slice(stringEnumSchema(vpnProviderValues).Required()),
@@ -307,7 +307,7 @@ var ServerUpdaterOptionsSchema = z.Struct(z.Shape{
 	"ProtonVPNPassword":   z.String(),
 })
 
-var VPNOptionsSchema = z.Struct(z.Shape{
+var VPNSchema = z.Struct(z.Shape{
 	"ServiceProvider": VPNProviderSchema,
 	"Type": z.StringLike[config.VPNProtocol]().OneOf([]config.VPNProtocol{
 		config.VPN_PROTOCOL_WIREGUARD,
@@ -324,7 +324,7 @@ var WireguardImplementationSchema = stringEnumSchema([]WireguardImplementation{
 	UserSpace,
 })
 
-var WireguardOptionsSchema = z.Struct(z.Shape{
+var WireguardSchema = z.Struct(z.Shape{
 	"PrivateKey":                  z.String().Required(),
 	"Addresses":                   z.Slice(z.String().TestFunc(isValidSubnet)).Required(),
 	"PublicKey":                   z.String().Required(),

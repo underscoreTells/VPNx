@@ -1,4 +1,4 @@
-package gluetun
+package options
 
 import "github.com/underscoreTells/vpn-exit-node/internal/config"
 
@@ -38,7 +38,7 @@ const (
 	HttpControlServerLogOff HttpControlServerLog = "off"
 )
 
-type ControlServerOptions struct {
+type ControlServer struct {
 	Address            string               `mapstructure:"HTTP_CONTROL_SERVER_ADDRESS,omitempty"`
 	Log                HttpControlServerLog `mapstructure:"HTTP_CONTROL_SERVER_LOG,omitempty"`
 	AuthConfigFilepath string               `mapstructure:"HTTP_CONTROL_SERVER_AUTH_CONFIG_FILEPATH,omitempty"`
@@ -290,11 +290,11 @@ type Other struct {
 	BoringPollGluetunCom BoringPollGluetunCom `mapstructure:"BORING_POLL_GLUETUN_COM,omitempty"`
 }
 
-type VPNPortForwarding string
+type VPNPortForwardingStatus string
 
 const (
-	VPNPortForwardingOn  VPNPortForwarding = "on"
-	VPNPortForwardingOff VPNPortForwarding = "off"
+	VPNPortForwardingOn  VPNPortForwardingStatus = "on"
+	VPNPortForwardingOff VPNPortForwardingStatus = "off"
 )
 
 type VPNPortForwardingProvider string
@@ -307,8 +307,8 @@ const (
 	PortForwardingProtonVPN      VPNPortForwardingProvider = "protonvpn"
 )
 
-type VPNServerPortForwardingOptions struct {
-	VPNPortForwarding VPNPortForwarding         `mapstructure:"VPN_PORT_FORWARDING,omitempty"`
+type VPNPortForwarding struct {
+	VPNPortForwarding VPNPortForwardingStatus   `mapstructure:"VPN_PORT_FORWARDING,omitempty"`
 	Provider          VPNPortForwardingProvider `mapstructure:"VPN_PORT_FORWARDING_PROVIDER,omitempty"`
 	StatusFile        string                    `mapstructure:"VPN_PORT_FORWARDING_STATUS_FILE,omitempty"`
 	ListeningPort     int                       `mapstructure:"VPN_PORT_FORWARDING_LISTENING_PORT,omitempty"`
@@ -316,11 +316,11 @@ type VPNServerPortForwardingOptions struct {
 	DownCommand       string                    `mapstructure:"VPN_PORT_FORWARDING_DOWN_COMMAND,omitempty"`
 }
 
-type ShadowSocks string
+type ShadowSocksStatus string
 
 const (
-	ShadowSocksOn  ShadowSocks = "on"
-	ShadowSocksOff ShadowSocks = "off"
+	ShadowSocksOn  ShadowSocksStatus = "on"
+	ShadowSocksOff ShadowSocksStatus = "off"
 )
 
 type ShadowSocksLog string
@@ -338,19 +338,19 @@ const (
 	ShadowSocksCipherAes256Gcm            ShadowSocksCipher = "aes-256-gcm"
 )
 
-type ShadowSocksOptions struct {
-	ShadowSocks      ShadowSocks       `mapstructure:"SHADOWSOCKS,omitempty"`
+type ShadowSocks struct {
+	ShadowSocks      ShadowSocksStatus `mapstructure:"SHADOWSOCKS,omitempty"`
 	Log              ShadowSocksLog    `mapstructure:"SHADOWSOCKS_LOG,omitempty"`
 	ListeningAddress string            `mapstructure:"SHADOWSOCKS_LISTENING_ADDRESS,omitempty"`
 	Password         string            `mapstructure:"SHADOWSOCKS_PASSWORD,omitempty"`
 	Cipher           ShadowSocksCipher `mapstructure:"SHADOWSOCKS_CIPHER,omitempty"`
 }
 
-type StorageOptions struct {
+type Storage struct {
 	FilePath string `mapstructure:"STORAGE_FILE_PATH,omitempty"`
 }
 
-type ServerUpdaterOptions struct {
+type ServerUpdater struct {
 	Period              string        `mapstructure:"UPDATER_PERIOD,omitempty"`
 	MinRatio            float64       `mapstructure:"UPDATER_MIN_RATIO,omitempty"`
 	VPNServiceProviders []VPNProvider `mapstructure:"UPDATER_VPN_SERVICE_PROVIDERS,omitempty"`
@@ -358,7 +358,7 @@ type ServerUpdaterOptions struct {
 	ProtonVPNPassword   string        `mapstructure:"PROTONVPN_PASSWORD,omitempty"`
 }
 
-type VPNOptions struct {
+type VPN struct {
 	ServiceProvider VPNProvider        `mapstructure:"VPN_SERVICE_PROVIDER,omitempty"`
 	Type            config.VPNProtocol `mapstructure:"VPN_TYPE,omitempty"`
 	Interface       string             `mapstructure:"VPN_INTERFACE,omitempty"`
@@ -374,7 +374,7 @@ const (
 	UserSpace   WireguardImplementation = "userspace"
 )
 
-type WireguardOptions struct {
+type Wireguard struct {
 	PrivateKey   string   `mapstructure:"WIREGUARD_PRIVATE_KEY"`
 	Addresses    []string `mapstructure:"WIREGUARD_ADDRESSES"`
 	PublicKey    string   `mapstructure:"WIREGUARD_PUBLIC_KEY"`

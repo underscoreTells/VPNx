@@ -1,4 +1,4 @@
-package gluetun
+package options
 
 import (
 	"crypto/ecdsa"
