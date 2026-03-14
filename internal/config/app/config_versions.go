@@ -1,4 +1,4 @@
-package config
+package app
 
 var ConfigVersions = map[ConfigVersion]func() any{
 	CONFIG_VERSION_ONE: func() any {

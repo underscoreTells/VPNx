@@ -1,7 +1,7 @@
 package gluetun
 
 import (
-	"github.com/underscoreTells/vpn-exit-node/internal/gluetun/options"
+	"github.com/underscoreTells/vpn-exit-node/internal/config/gluetun/options"
 )
 
 type GluetunProfile struct {

@@ -3,18 +3,21 @@ package config
 import (
 	"fmt"
 	"testing"
+
+	"github.com/underscoreTells/vpn-exit-node/internal/config/app"
+	"github.com/underscoreTells/vpn-exit-node/internal/config/common"
 )
 
 var (
-	testSchemaVersion  = DEFAULT_CONFIG_VERSION
-	testGluetunVersion = GLUETUN_TARGET_VERSION
+	testSchemaVersion  = app.DEFAULT_CONFIG_VERSION
+	testGluetunVersion = app.GLUETUN_TARGET_VERSION
 	testVPNProvider    = "custom"
-	testVPNProtocol    = VPN_PROTOCOL_WIREGUARD
+	testVPNProtocol    = common.ProtocolWireguard
 	testUsernameFrom   = "env"
 	testUsernameName   = "VPN_USERNAME"
 	testPasswordFrom   = "env"
 	testPasswordName   = "VPN_PASSWORD"
-	testLogLevel       = LOG_LEVEL_INFO
+	testLogLevel       = app.LOG_LEVEL_INFO
 	testLogDestination = "stdout"
 	testLogFilename    = "vpnx.log"
 	testSchema         = fmt.Appendf(nil, `{
@@ -84,7 +87,7 @@ var (
 )
 
 func TestGetConfigVersion(t *testing.T) {
-	version, err := GetConfigVersion(testSchema, VPNSchemaVersion)
+	version, err := GetAppConfigVersion(testSchema)
 	if err != nil {
 		t.Errorf("GetConfigVersion error: %v", err)
 	}
@@ -95,7 +98,7 @@ func TestGetConfigVersion(t *testing.T) {
 }
 
 func TestLoadFromBytes(t *testing.T) {
-	config, err := LoadFromBytes[ConfigVersionOne](testSchema, VPNConfigVersionOneSchema)
+	config, err := LoadAppConfigFromBytes(testSchema)
 	if err != nil {
 		t.Errorf("LoadFromBytes error: %v", err)
 	}
@@ -138,20 +141,20 @@ func TestLoadFromBytes(t *testing.T) {
 }
 
 func TestDefaults(t *testing.T) {
-	config, err := LoadFromBytes[ConfigVersionOne](testDefaultsSchema, VPNConfigVersionOneSchema)
+	config, err := LoadAppConfigFromBytes(testDefaultsSchema)
 	if err != nil {
 		t.Errorf("LoadFromBytes error: %v", err)
 	}
 
-	if config.SchemaVersion != DEFAULT_CONFIG_VERSION {
-		t.Errorf("LoadFromBytes returned wrong schema version: %d, expected %d", config.SchemaVersion, DEFAULT_CONFIG_VERSION)
+	if config.SchemaVersion != app.DEFAULT_CONFIG_VERSION {
+		t.Errorf("LoadFromBytes returned wrong schema version: %d, expected %d", config.SchemaVersion, app.DEFAULT_CONFIG_VERSION)
 	}
 
-	if config.VPNConfig.Protocol != DEFAULT_VPN_PROTOCOL {
-		t.Errorf("LoadFromBytes returned wrong VPN protocol: %s, expected %s", config.VPNConfig.Protocol, DEFAULT_VPN_PROTOCOL)
+	if config.VPNConfig.Protocol != app.DEFAULT_VPN_PROTOCOL {
+		t.Errorf("LoadFromBytes returned wrong VPN protocol: %s, expected %s", config.VPNConfig.Protocol, app.DEFAULT_VPN_PROTOCOL)
 	}
 
-	if config.Log.Level != DEFAULT_LOG_LEVEL {
-		t.Errorf("LoadFromBytes returned wrong log level: %s, expected %s", config.Log.Level, DEFAULT_LOG_LEVEL)
+	if config.Log.Level != app.DEFAULT_LOG_LEVEL {
+		t.Errorf("LoadFromBytes returned wrong log level: %s, expected %s", config.Log.Level, app.DEFAULT_LOG_LEVEL)
 	}
 }

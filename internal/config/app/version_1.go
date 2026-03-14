@@ -1,6 +1,9 @@
-package config
+package app
 
-import z "github.com/Oudwins/zog"
+import (
+	z "github.com/Oudwins/zog"
+	"github.com/underscoreTells/vpn-exit-node/internal/config/common"
+)
 
 type SchemaVersion struct {
 	SchemaVersion ConfigVersion `zog:"schema_version"`
@@ -14,8 +17,8 @@ type ConfigVersionOne struct {
 	SchemaVersion  ConfigVersion `zog:"schema_version"`
 	GluetunVersion string        `zog:"gluetun_version"`
 	VPNConfig      struct {
-		Provider    string      `zog:"provider"`
-		Protocol    VPNProtocol `zog:"protocol"`
+		Provider    string          `zog:"provider"`
+		Protocol    common.Protocol `zog:"protocol"`
 		Credentials struct {
 			Username struct {
 				From string `zog:"from"`
@@ -39,7 +42,7 @@ var VPNConfigVersionOneSchema = z.Struct(z.Shape{
 	"GluetunVersion": z.String(),
 	"VPNConfig": z.Struct(z.Shape{
 		"Provider": z.String(),
-		"Protocol": z.StringLike[VPNProtocol]().Default(DEFAULT_VPN_PROTOCOL).OneOf([]VPNProtocol{VPN_PROTOCOL_WIREGUARD, VPN_PROTOCOL_OPENVPN}),
+		"Protocol": z.StringLike[common.Protocol]().Default(DEFAULT_VPN_PROTOCOL).OneOf([]common.Protocol{common.ProtocolWireguard, common.ProtocolOpenVPN}),
 		"Credentials": z.Struct(z.Shape{
 			"Username": z.Struct(z.Shape{
 				"From": z.String(),

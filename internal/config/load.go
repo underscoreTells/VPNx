@@ -8,11 +8,10 @@ import (
 
 	z "github.com/Oudwins/zog"
 	"github.com/Oudwins/zog/parsers/zjson"
+	"github.com/underscoreTells/vpn-exit-node/internal/config/app"
 )
 
-// LoadConfigFromFile loads a config file from disk, validates it against the provided
-// schema, and returns the parsed config along with any validation errors encountered.
-func LoadFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) {
+func loadFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) {
 	ext := filepath.Ext(path)
 	if ext != ".json" {
 		return nil, []error{fmt.Errorf("unsupported config file extension: %s", ext)}
@@ -23,11 +22,11 @@ func LoadFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) 
 		return nil, []error{fmt.Errorf("failed to read config file %s: %w", path, err)}
 	}
 
-	return LoadFromBytes[cfg](data, schema)
+	return loadFromBytes[cfg](data, schema)
 }
 
-func LoadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error) {
-	configVersion, versionErrs := GetConfigVersion(data, VPNSchemaVersion)
+func loadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error) {
+	configVersion, versionErrs := getConfigVersion(data, app.VPNSchemaVersion)
 	if len(versionErrs) > 0 {
 		errors := make([]error, len(versionErrs))
 		for i, versionErr := range versionErrs {
@@ -36,7 +35,7 @@ func LoadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error)
 		return nil, errors
 	}
 
-	rawConfig := ConfigVersions[configVersion]()
+	rawConfig := app.ConfigVersions[configVersion]()
 	config, ok := rawConfig.(cfg)
 	if !ok {
 		return nil, []error{fmt.Errorf("failed to convert config to type %T", config)}
@@ -55,8 +54,8 @@ func LoadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error)
 	return &config, nil
 }
 
-func GetConfigVersion(data []byte, versionSchema *z.StructSchema) (ConfigVersion, z.ZogIssueList) {
-	var schemaVersion SchemaVersion
+func getConfigVersion(data []byte, versionSchema *z.StructSchema) (app.ConfigVersion, z.ZogIssueList) {
+	var schemaVersion app.SchemaVersion
 	zogErrs := versionSchema.Parse(zjson.Decode(bytes.NewReader(data)), &schemaVersion)
 
 	if len(zogErrs) > 0 {
@@ -66,4 +65,16 @@ func GetConfigVersion(data []byte, versionSchema *z.StructSchema) (ConfigVersion
 	configVersion := schemaVersion.SchemaVersion
 
 	return configVersion, nil
+}
+
+func LoadAppConfigFromFile(path string) (*app.ConfigVersionOne, []error) {
+	return loadFromFile[app.ConfigVersionOne](path, app.VPNConfigVersionOneSchema)
+}
+
+func LoadAppConfigFromBytes(data []byte) (*app.ConfigVersionOne, []error) {
+	return loadFromBytes[app.ConfigVersionOne](data, app.VPNConfigVersionOneSchema)
+}
+
+func GetAppConfigVersion(data []byte) (app.ConfigVersion, z.ZogIssueList) {
+	return getConfigVersion(data, app.VPNSchemaVersion)
 }

@@ -2,7 +2,7 @@ package options
 
 import (
 	z "github.com/Oudwins/zog"
-	"github.com/underscoreTells/vpn-exit-node/internal/config"
+	"github.com/underscoreTells/vpn-exit-node/internal/config/common"
 )
 
 var vpnProviderValues = []VPNProvider{
@@ -309,9 +309,9 @@ var ServerUpdaterSchema = z.Struct(z.Shape{
 
 var VPNSchema = z.Struct(z.Shape{
 	"ServiceProvider": VPNProviderSchema,
-	"Type": z.StringLike[config.VPNProtocol]().OneOf([]config.VPNProtocol{
-		config.VPN_PROTOCOL_WIREGUARD,
-		config.VPN_PROTOCOL_OPENVPN,
+	"Type": z.StringLike[common.Protocol]().OneOf([]common.Protocol{
+		common.ProtocolWireguard,
+		common.ProtocolOpenVPN,
 	}),
 	"Interface":   z.String(),
 	"UpCommand":   z.String(),

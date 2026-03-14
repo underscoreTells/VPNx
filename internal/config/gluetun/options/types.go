@@ -1,6 +1,6 @@
 package options
 
-import "github.com/underscoreTells/vpn-exit-node/internal/config"
+import "github.com/underscoreTells/vpn-exit-node/internal/config/common"
 
 type VPNProvider string
 
@@ -359,11 +359,11 @@ type ServerUpdater struct {
 }
 
 type VPN struct {
-	ServiceProvider VPNProvider        `mapstructure:"VPN_SERVICE_PROVIDER,omitempty"`
-	Type            config.VPNProtocol `mapstructure:"VPN_TYPE,omitempty"`
-	Interface       string             `mapstructure:"VPN_INTERFACE,omitempty"`
-	UpCommand       string             `mapstructure:"VPN_UP_COMMAND,omitempty"`
-	DownCommand     string             `mapstructure:"VPN_DOWN_COMMAND,omitempty"`
+	ServiceProvider VPNProvider     `mapstructure:"VPN_SERVICE_PROVIDER,omitempty"`
+	Type            common.Protocol `mapstructure:"VPN_TYPE,omitempty"`
+	Interface       string          `mapstructure:"VPN_INTERFACE,omitempty"`
+	UpCommand       string          `mapstructure:"VPN_UP_COMMAND,omitempty"`
+	DownCommand     string          `mapstructure:"VPN_DOWN_COMMAND,omitempty"`
 }
 
 type WireguardImplementation string
