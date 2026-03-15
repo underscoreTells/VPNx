@@ -1,4 +1,4 @@
-package options
+package gluetun
 
 import (
 	"crypto/ecdsa"
@@ -18,26 +18,20 @@ import (
 	z "github.com/Oudwins/zog"
 )
 
-type singleStringValue struct {
-	Value string
-}
-
 type singleStringCase struct {
 	name      string
 	input     string
 	wantValid bool
 }
 
-func runSingleStringSchemaCases(t *testing.T, schema *z.StructSchema, cases []singleStringCase) {
+func runSingleStringSchemaCases(t *testing.T, schema *z.StringSchema[string], cases []singleStringCase) {
 	t.Helper()
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			var dest singleStringValue
+			var dest string
 
-			errs := schema.Parse(map[string]any{
-				"Value": tc.input,
-			}, &dest)
+			errs := schema.Parse(tc.input, &dest)
 
 			gotValid := len(errs) == 0
 			if gotValid != tc.wantValid {
@@ -48,9 +42,7 @@ func runSingleStringSchemaCases(t *testing.T, schema *z.StructSchema, cases []si
 }
 
 func TestListeningAddressSchema(t *testing.T) {
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidListeningAddress),
-	})
+	schema := z.String().TestFunc(isValidListeningAddress)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "valid_port", input: ":8080", wantValid: true},
@@ -70,9 +62,7 @@ func TestFilePathSchema(t *testing.T) {
 		t.Fatalf("write temp file: %v", err)
 	}
 
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidFilePath),
-	})
+	schema := z.String().TestFunc(isValidFilePath)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "existing_file", input: filePath, wantValid: true},
@@ -85,9 +75,7 @@ func TestFilePathSchema(t *testing.T) {
 }
 
 func TestTimePeriodSchema(t *testing.T) {
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidTimePeriod),
-	})
+	schema := z.String().TestFunc(isValidTimePeriod)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "valid_seconds", input: "15s", wantValid: true},
@@ -104,9 +92,7 @@ func TestTimePeriodSchema(t *testing.T) {
 }
 
 func TestHostnameSchema(t *testing.T) {
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidHostname),
-	})
+	schema := z.String().TestFunc(isValidHostname)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "valid_hostname", input: "example.com", wantValid: true},
@@ -120,9 +106,7 @@ func TestHostnameSchema(t *testing.T) {
 }
 
 func TestPlainAddressSchema(t *testing.T) {
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidPlainAddress),
-	})
+	schema := z.String().TestFunc(isValidPlainAddress)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "valid_plain_address", input: "1.2.3.4:53", wantValid: true},
@@ -135,7 +119,9 @@ func TestPlainAddressSchema(t *testing.T) {
 	})
 }
 
-func TestFirewallSchemaOutboundSubnets(t *testing.T) {
+func TestSubnetSliceSchema(t *testing.T) {
+	schema := z.Slice(z.String().TestFunc(isValidSubnet))
+
 	testCases := []struct {
 		name      string
 		input     []string
@@ -152,28 +138,24 @@ func TestFirewallSchemaOutboundSubnets(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var firewall Firewall
+			var dest []string
 
-			errs := FirewallSchema.Parse(map[string]any{
-				"OutboundSubnets": tc.input,
-			}, &firewall)
+			errs := schema.Parse(tc.input, &dest)
 
 			gotValid := len(errs) == 0
 			if gotValid != tc.wantValid {
-				t.Fatalf("FirewallSchema.Parse(%q) valid = %v, want %v", tc.input, gotValid, tc.wantValid)
+				t.Fatalf("schema.Parse(%q) valid = %v, want %v", tc.input, gotValid, tc.wantValid)
 			}
 
-			if tc.wantValid && len(firewall.OutboundSubnets) != len(tc.input) {
-				t.Fatalf("expected %d parsed subnets, got %d", len(tc.input), len(firewall.OutboundSubnets))
+			if tc.wantValid && len(dest) != len(tc.input) {
+				t.Fatalf("expected %d parsed subnets, got %d", len(tc.input), len(dest))
 			}
 		})
 	}
 }
 
 func TestCIDRAddressSchema(t *testing.T) {
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidCIDRAddress),
-	})
+	schema := z.String().TestFunc(isValidCIDRAddress)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "valid_ipv4_cidr", input: "192.168.1.0/24", wantValid: true},
@@ -186,10 +168,7 @@ func TestCIDRAddressSchema(t *testing.T) {
 
 func TestBase64PEMSchema(t *testing.T) {
 	fixtures := newPEMFixtures(t)
-
-	schema := z.Struct(z.Shape{
-		"Value": z.String().TestFunc(isValidBase64PEM),
-	})
+	schema := z.String().TestFunc(isValidBase64PEM)
 
 	runSingleStringSchemaCases(t, schema, []singleStringCase{
 		{name: "valid_certificate_pem", input: fixtures.certificatePEM, wantValid: true},
@@ -201,6 +180,54 @@ func TestBase64PEMSchema(t *testing.T) {
 		{name: "unsupported_pem_block_type", input: fixtures.unsupportedPEM, wantValid: false},
 		{name: "legacy_encrypted_rsa_private_key", input: fixtures.legacyEncryptedRSAPrivateKeyPEM, wantValid: false},
 	})
+}
+
+func TestNumberGluetunEnvTreatsEmptyStringAsUnset(t *testing.T) {
+	env := newNumberGluetunEnv("PUID", z.Int())
+
+	if errs := env.validate(""); len(errs) != 0 {
+		t.Fatalf("expected empty string to be treated as unset, got %v", errs)
+	}
+
+	if errs := env.validate("1000"); len(errs) != 0 {
+		t.Fatalf("expected valid int env, got %v", errs)
+	}
+
+	if errs := env.validate("abc"); len(errs) == 0 {
+		t.Fatal("expected invalid int env to fail")
+	}
+}
+
+func TestRequiredGluetunEnvTreatsEmptyStringAsMissing(t *testing.T) {
+	env := newGluetunEnv("OPENVPN_USER", z.String().Required())
+
+	if errs := env.validate(""); len(errs) == 0 {
+		t.Fatal("expected empty required env to fail")
+	}
+}
+
+func TestBoolGluetunEnvParsesOnOffValues(t *testing.T) {
+	env := newBoolGluetunEnv("PUBLIC_IP_ENABLED", z.Bool())
+
+	if errs := env.validate("on"); len(errs) != 0 {
+		t.Fatalf("expected on to parse as bool, got %v", errs)
+	}
+
+	if errs := env.validate("off"); len(errs) != 0 {
+		t.Fatalf("expected off to parse as bool, got %v", errs)
+	}
+}
+
+func TestCSVGluetunEnvValidatesCommaSeparatedValues(t *testing.T) {
+	env := newCSVGluetunEnv[int]("FIREWALL_INPUT_PORTS", z.Slice(z.Int().GTE(0).LTE(65535)))
+
+	if errs := env.validate("80,443"); len(errs) != 0 {
+		t.Fatalf("expected valid csv env, got %v", errs)
+	}
+
+	if errs := env.validate("80,nope"); len(errs) == 0 {
+		t.Fatal("expected invalid csv env to fail")
+	}
 }
 
 type pemFixtures struct {
@@ -260,15 +287,16 @@ func newPEMFixtures(t *testing.T) pemFixtures {
 		certificatePEM:       certificatePEM,
 		base64CertificatePEM: base64.StdEncoding.EncodeToString([]byte(certificatePEM)),
 		privateKeyPEM:        privateKeyPEM,
-		base64NonPEM:         base64.StdEncoding.EncodeToString([]byte("not pem")),
+		base64NonPEM:         base64.StdEncoding.EncodeToString([]byte("not a pem document")),
 		unsupportedPEM:       unsupportedPEM,
-		legacyEncryptedRSAPrivateKeyPEM: string(pem.EncodeToMemory(&pem.Block{
-			Type: "RSA PRIVATE KEY",
-			Headers: map[string]string{
-				"Proc-Type": "4,ENCRYPTED",
-				"DEK-Info":  "AES-256-CBC,0123456789ABCDEF0123456789ABCDEF",
-			},
-			Bytes: []byte("legacy-encrypted"),
-		})),
+		legacyEncryptedRSAPrivateKeyPEM: strings.Join([]string{
+			"-----BEGIN RSA PRIVATE KEY-----",
+			"Proc-Type: 4,ENCRYPTED",
+			"DEK-Info: AES-256-CBC,0123456789ABCDEF0123456789ABCDEF",
+			"",
+			base64.StdEncoding.EncodeToString([]byte("encrypted payload")),
+			"-----END RSA PRIVATE KEY-----",
+			"",
+		}, "\n"),
 	}
 }

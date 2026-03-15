@@ -1,4 +1,4 @@
-package app
+package config
 
 const (
 	LOG_LEVEL_DEBUG   = "debug"
@@ -18,4 +18,11 @@ type ConfigVersion int
 
 const (
 	CONFIG_VERSION_ONE ConfigVersion = 1
+)
+
+type Protocol string
+
+const (
+	ProtocolWireguard Protocol = "wireguard"
+	ProtocolOpenVPN   Protocol = "openvpn"
 )
