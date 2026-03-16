@@ -14,14 +14,15 @@ func getDir(pathEnvVar string, fallbackHome string, fallbackPath string) (string
 		return v, nil
 	}
 
-	info, err := os.Stat(os.Getenv(fallbackHome) + fallbackPath)
+	path := os.Getenv(fallbackHome) + fallbackPath
+	info, err := os.Stat(path)
 	if err != nil {
 		return "", newDirUnavailableError(err)
 	}
 	if !info.IsDir() {
 		return "", newDirUnavailableError(fmt.Errorf("not a directory"))
 	}
-	return fallbackHome + fallbackPath, nil
+	return path, nil
 }
 
 func GetConfigDir() (string, error) {

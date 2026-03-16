@@ -2,12 +2,12 @@ package gluetun
 
 import z "github.com/Oudwins/zog"
 
-type gluetunVersion []gluetunEnv
+type GluetunVersionVars []GluetunEnv
 
-func (g gluetunVersion) envMap() map[string]gluetunEnv {
-	result := make(map[string]gluetunEnv, len(g))
+func (g GluetunVersionVars) EnvMap() map[string]GluetunEnv {
+	result := make(map[string]GluetunEnv, len(g))
 	for _, env := range g {
-		result[env.name()] = env
+		result[env.Name()] = env
 	}
 	return result
 }
@@ -68,7 +68,7 @@ var publicIPAPIValues = []string{
 	"cloudflare",
 }
 
-var gluetunVersion3 = gluetunVersion{
+var GluetunVersion3 = GluetunVersionVars{
 	newGluetunEnv("HTTP_CONTROL_SERVER_ADDRESS", z.String().TestFunc(isValidListeningAddress)),
 	newGluetunEnv("HTTP_CONTROL_SERVER_LOG", stringEnumSchema(onOffValues)),
 	newGluetunEnv("HTTP_CONTROL_SERVER_AUTH_CONFIG_FILEPATH", z.String().TestFunc(isValidFilePath)),

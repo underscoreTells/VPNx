@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	z "github.com/Oudwins/zog"
 	"github.com/Oudwins/zog/parsers/zjson"
+	"github.com/underscoreTells/vpn-exit-node/internal/config/gluetun"
 )
 
 func loadFromFile[cfg any](path string, schema *z.StructSchema) (*cfg, []error) {
@@ -34,7 +36,12 @@ func loadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error)
 		return nil, errors
 	}
 
-	rawConfig := ConfigVersions[configVersion]()
+	configFactory, ok := ConfigVersions[configVersion]
+	if !ok {
+		return nil, []error{fmt.Errorf("unsupported config version: %d", configVersion)}
+	}
+
+	rawConfig := configFactory()
 	config, ok := rawConfig.(cfg)
 	if !ok {
 		return nil, []error{fmt.Errorf("failed to convert config to type %T", config)}
@@ -51,6 +58,40 @@ func loadFromBytes[cfg any](data []byte, schema *z.StructSchema) (*cfg, []error)
 	}
 
 	return &config, nil
+}
+
+func ExtractEnvVars(config AppConfig) (map[string]string, []error) {
+	envVarsVersion := config.GluetunVersionValue()
+	rawEnvVars := config.EnvVarsValue()
+	gluetunEnvVars, ok := gluetun.ConfigEnvVarsVersions[envVarsVersion]
+	if !ok {
+		return nil, []error{fmt.Errorf("unsupported gluetun version: %s", envVarsVersion)}
+	}
+	gluetunEnvVarsMap := gluetunEnvVars.EnvMap()
+
+	envVars := make(map[string]string)
+	for _, rawEnvVar := range rawEnvVars {
+		split := strings.SplitN(rawEnvVar, "=", 2)
+		if len(split) != 2 {
+			return nil, []error{fmt.Errorf("invalid env var format: %s. expected format: key=value", rawEnvVar)}
+		}
+		key := split[0]
+		value := split[1]
+		if envValidator, ok := gluetunEnvVarsMap[key]; ok {
+			if zogErrs := envValidator.Validate(value); len(zogErrs) > 0 {
+				errs := make([]error, 0, len(zogErrs))
+				for _, zogErr := range zogErrs {
+					errs = append(errs, fmt.Errorf("invalid env var value: %s: %w", key, zogErr))
+				}
+				return nil, errs
+			}
+			envVars[key] = value
+		} else {
+			return nil, []error{fmt.Errorf("unknown env var: %s", key)}
+		}
+	}
+
+	return envVars, nil
 }
 
 func getConfigVersion(data []byte, versionSchema *z.StructSchema) (ConfigVersion, z.ZogIssueList) {

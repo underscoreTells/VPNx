@@ -185,15 +185,15 @@ func TestBase64PEMSchema(t *testing.T) {
 func TestNumberGluetunEnvTreatsEmptyStringAsUnset(t *testing.T) {
 	env := newNumberGluetunEnv("PUID", z.Int())
 
-	if errs := env.validate(""); len(errs) != 0 {
+	if errs := env.Validate(""); len(errs) != 0 {
 		t.Fatalf("expected empty string to be treated as unset, got %v", errs)
 	}
 
-	if errs := env.validate("1000"); len(errs) != 0 {
+	if errs := env.Validate("1000"); len(errs) != 0 {
 		t.Fatalf("expected valid int env, got %v", errs)
 	}
 
-	if errs := env.validate("abc"); len(errs) == 0 {
+	if errs := env.Validate("abc"); len(errs) == 0 {
 		t.Fatal("expected invalid int env to fail")
 	}
 }
@@ -201,7 +201,7 @@ func TestNumberGluetunEnvTreatsEmptyStringAsUnset(t *testing.T) {
 func TestRequiredGluetunEnvTreatsEmptyStringAsMissing(t *testing.T) {
 	env := newGluetunEnv("OPENVPN_USER", z.String().Required())
 
-	if errs := env.validate(""); len(errs) == 0 {
+	if errs := env.Validate(""); len(errs) == 0 {
 		t.Fatal("expected empty required env to fail")
 	}
 }
@@ -209,11 +209,11 @@ func TestRequiredGluetunEnvTreatsEmptyStringAsMissing(t *testing.T) {
 func TestBoolGluetunEnvParsesOnOffValues(t *testing.T) {
 	env := newBoolGluetunEnv("PUBLIC_IP_ENABLED", z.Bool())
 
-	if errs := env.validate("on"); len(errs) != 0 {
+	if errs := env.Validate("on"); len(errs) != 0 {
 		t.Fatalf("expected on to parse as bool, got %v", errs)
 	}
 
-	if errs := env.validate("off"); len(errs) != 0 {
+	if errs := env.Validate("off"); len(errs) != 0 {
 		t.Fatalf("expected off to parse as bool, got %v", errs)
 	}
 }
@@ -221,11 +221,11 @@ func TestBoolGluetunEnvParsesOnOffValues(t *testing.T) {
 func TestCSVGluetunEnvValidatesCommaSeparatedValues(t *testing.T) {
 	env := newCSVGluetunEnv[int]("FIREWALL_INPUT_PORTS", z.Slice(z.Int().GTE(0).LTE(65535)))
 
-	if errs := env.validate("80,443"); len(errs) != 0 {
+	if errs := env.Validate("80,443"); len(errs) != 0 {
 		t.Fatalf("expected valid csv env, got %v", errs)
 	}
 
-	if errs := env.validate("80,nope"); len(errs) == 0 {
+	if errs := env.Validate("80,nope"); len(errs) == 0 {
 		t.Fatal("expected invalid csv env to fail")
 	}
 }

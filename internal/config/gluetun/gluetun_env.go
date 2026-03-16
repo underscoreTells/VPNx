@@ -6,55 +6,55 @@ import (
 	z "github.com/Oudwins/zog"
 )
 
-type gluetunEnv struct {
-	_name        string
+type GluetunEnv struct {
+	name         string
 	validateFunc func(value string) z.ZogIssueList
 }
 
-func newGluetunEnv(name string, schema *z.StringSchema[string]) gluetunEnv {
+func newGluetunEnv(name string, schema *z.StringSchema[string]) GluetunEnv {
 	return newStringGluetunEnv(name, schema)
 }
 
-func newStringGluetunEnv[T ~string](name string, schema *z.StringSchema[T]) gluetunEnv {
+func newStringGluetunEnv[T ~string](name string, schema *z.StringSchema[T]) GluetunEnv {
 	return newValidatedGluetunEnv(name, func(value string) z.ZogIssueList {
 		var dest T
 		return schema.Parse(normalizeGluetunEnvValue(value), &dest)
 	})
 }
 
-func newBoolGluetunEnv[T ~bool](name string, schema *z.BoolSchema[T]) gluetunEnv {
+func newBoolGluetunEnv[T ~bool](name string, schema *z.BoolSchema[T]) GluetunEnv {
 	return newValidatedGluetunEnv(name, func(value string) z.ZogIssueList {
 		var dest T
 		return schema.Parse(normalizeGluetunEnvValue(value), &dest)
 	})
 }
 
-func newNumberGluetunEnv[T z.Numeric](name string, schema *z.NumberSchema[T]) gluetunEnv {
+func newNumberGluetunEnv[T z.Numeric](name string, schema *z.NumberSchema[T]) GluetunEnv {
 	return newValidatedGluetunEnv(name, func(value string) z.ZogIssueList {
 		var dest T
 		return schema.Parse(normalizeGluetunEnvValue(value), &dest)
 	})
 }
 
-func newCSVGluetunEnv[T any](name string, schema *z.SliceSchema) gluetunEnv {
+func newCSVGluetunEnv[T any](name string, schema *z.SliceSchema) GluetunEnv {
 	return newValidatedGluetunEnv(name, func(value string) z.ZogIssueList {
 		dest := new([]T)
 		return schema.Parse(splitCSVGluetunEnvValue(value), dest)
 	})
 }
 
-func newValidatedGluetunEnv(name string, validateFunc func(value string) z.ZogIssueList) gluetunEnv {
-	return gluetunEnv{
-		_name:        name,
+func newValidatedGluetunEnv(name string, validateFunc func(value string) z.ZogIssueList) GluetunEnv {
+	return GluetunEnv{
+		name:         name,
 		validateFunc: validateFunc,
 	}
 }
 
-func (e gluetunEnv) name() string {
-	return e._name
+func (e GluetunEnv) Name() string {
+	return e.name
 }
 
-func (e gluetunEnv) validate(value string) z.ZogIssueList {
+func (e GluetunEnv) Validate(value string) z.ZogIssueList {
 	return e.validateFunc(value)
 }
 

@@ -4,6 +4,11 @@ import (
 	z "github.com/Oudwins/zog"
 )
 
+type AppConfig interface {
+	GluetunVersionValue() string
+	EnvVarsValue() []string
+}
+
 type SchemaVersion struct {
 	SchemaVersion ConfigVersion `zog:"schema_version"`
 }
@@ -13,8 +18,8 @@ var VPNSchemaVersion = z.Struct(z.Shape{
 })
 
 type ConfigCredential struct {
-	From string `zog:"username"`
-	Name string `zog:"password"`
+	From string `zog:"from"`
+	Name string `zog:"name"`
 }
 
 var ConfigCredentialSchema = z.Struct(z.Shape{
@@ -46,6 +51,14 @@ type ConfigVersionOne struct {
 		Filename    string `zog:"filename"`
 	} `zog:"log"`
 	EnvVars []string `zog:"env_vars"`
+}
+
+func (c ConfigVersionOne) GluetunVersionValue() string {
+	return c.GluetunVersion
+}
+
+func (c ConfigVersionOne) EnvVarsValue() []string {
+	return c.EnvVars
 }
 
 var VPNConfigVersionOneSchema = z.Struct(z.Shape{
