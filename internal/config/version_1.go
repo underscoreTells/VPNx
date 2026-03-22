@@ -17,16 +17,6 @@ var VPNSchemaVersion = z.Struct(z.Shape{
 	"SchemaVersion": z.IntLike[ConfigVersion]().Default(DEFAULT_CONFIG_VERSION),
 })
 
-type ConfigCredential struct {
-	From string `zog:"from"`
-	Name string `zog:"name"`
-}
-
-var ConfigCredentialSchema = z.Struct(z.Shape{
-	"From": z.String(),
-	"Name": z.String(),
-})
-
 type ConfigVersionOne struct {
 	SchemaVersion  ConfigVersion `zog:"schema_version"`
 	GluetunVersion string        `zog:"gluetun_version"`
